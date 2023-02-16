@@ -1,0 +1,51 @@
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly.graph_objs as go
+import pandas as pd
+import numpy 
+from dash.dependencies import Input, Output
+import plotly.express as px
+df = pd.read_excel('HISTORICO.xlsx')
+df.reset_index(inplace=True)
+print(df)
+#Inicializamos la app
+# Crear la aplicación de Dash:
+
+app = dash.Dash()
+
+# Definir el contenido de la página de Dash:
+
+app.layout = html.Div([
+    # Dropdown para seleccionar columnas:
+    dcc.Dropdown(
+        id='columns-selector',
+        options=[
+            {'label': col, 'value': col} for col in df.columns
+        ],
+        value=['columna1', 'columna2'],
+        multi=True
+    ),
+    # Gráfico de líneas:
+    dcc.Graph(id='graph')
+])
+
+# Definir la función de callback para actualizar la gráfica:
+
+@app.callback(
+    dash.dependencies.Output('graph', 'figure'),
+    [dash.dependencies.Input('columns-selector', 'value')])
+def update_graph(columns):
+    # Se crea la figura de Plotly:
+    fig = go.Figure()
+    # Se itera sobre las columnas seleccionadas:
+    for col in columns:
+        # Se agrega una línea para cada columna seleccionada:
+        fig.add_trace(go.Scatter(x=df["SEMANA"], y=df[col], mode='lines', name=col))
+    # Se devuelve la figura:
+    return fig
+
+# Se inicia la aplicación de Dash:
+
+if __name__ == '__main__':
+    app.run_server()
